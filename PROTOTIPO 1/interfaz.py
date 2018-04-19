@@ -1,11 +1,31 @@
 from tkinter import *
+from tkinter import messagebox
 import time
 import fix_yahoo_finance as yf
+
 #funciones de procesamiento
 def procesar():
     data = yf.download(Codigo.get(), start=Fecha_Inicio.get(), end=Fecha_Final.get())
-    etiqueta_actividad = Label(ventana, text=str(data))
-    etiqueta_actividad.grid(row=14, column=1)
+    print (guardar(data))
+    limpieza = (str(data).split("\n"))
+    DataFinal = []
+    for linea in limpieza[1:]:
+        datos = linea.split()
+        if len(datos) > 5:
+            DataFinal.append([datos[0],datos[4]])
+
+    if len(DataFinal) == 0:
+        messagebox.showwarning("Advertencia","Informacion invalida vuelva a intentar")
+    else:
+        messagebox.showinfo("Ok","Datos Listos y almacenados")
+        print (DataFinal)
+            
+    
+def guardar(data):
+    archivo = open(str(Codigo.get())+".txt", "w")
+    archivo.write(str(data))
+    archivo.close()
+    return ("Guardado")
 	
 
 #Instancia de la clase Tk
@@ -51,7 +71,7 @@ entrada_Tasa_interes.grid(row=8, column=2)
 
 #OPCIONES
 etiqueta_actividad = Label(ventana, text='OPCIONES: ')
-entrada_actividad = OptionMenu(ventana, actividad, "Americana", "Europea", "Monte-Carlod")
+entrada_actividad = OptionMenu(ventana, actividad, "Americana", "Europea", "Monte-Carlos")
 etiqueta_actividad.grid(row=10, column=1)
 entrada_actividad.grid(row=10, column=2)
 
