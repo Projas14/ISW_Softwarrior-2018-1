@@ -1,4 +1,4 @@
-[TAREA ISW-2018-1]
+[Proyecto ISW-2018-1]
 
 INTEGRANTES:
 * Paul Rojas Ojeda
