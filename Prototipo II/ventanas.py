@@ -1,7 +1,12 @@
-from tkinter import *
-import tkinter as tk
-from tkinter import ttk
+# !/usr/bin/python3
 from tkinter.ttk import  Style
+from tkinter import *
+try:
+    import tkinter as tk
+    from tkinter import ttk
+except ImportError:
+    import Tkinter as tk
+    import ttk
 from tkinter import messagebox
 import time
 import fix_yahoo_finance as yf
@@ -46,6 +51,49 @@ def functionS(data):
 
    return((1/(len(list)-1))*sumatoria)
 
+#Funciones nuevas pestañas 
+def Resultados_online(volatividad):
+	pes4 = ttk.Frame(notebook,style='My.TFrame')
+	notebook.add(pes4,text="Resultados_OnLine")
+	Banner4 = PhotoImage(file="img/bienvenidos2.png")
+	lblBanner4 = Label(pes4,image=Banner4,bg=colorFondo).place(x=0,y=0)
+
+	# for i in range(2): 
+	#     for j in range(2):
+	#     	if i == 0:
+	#     		if j == 0:
+	# 	    		l = Label(pes4,text="Nombre", relief=RIDGE) 
+	# 	    		l.place(x=200,y=200)
+	#     		if j == 1:
+	# 	    		l = Label(pes4,text="Valor", relief=RIDGE) 
+	# 	    		l.place(x=300,y=200)
+	#     	if i == 1:
+	#     		if j == 0:
+	# 	    		l = Label(pes4,text="Volatividad", relief=RIDGE) 
+	# 	    		l.place(x=200,y=300)
+	#     		if j==1:
+	# 	    		l = Label(pes4,text=str(volatividad), relief=RIDGE) 
+	# 	    		l.place(x=200,y=300)
+
+
+
+
+
+
+
+
+def pestaña_offline(volatividad):
+		pes3 = ttk.Frame(notebook,style='My.TFrame')
+		notebook.add(pes3,text="Resultados_offline")
+		#logo
+		Banner3 = PhotoImage(file="img/bienvenidos2.png")
+		lblBanner3 = Label(pes3,image=Banner3,bg=colorFondo).place(x=0,y=0)
+		#Codigo
+		listbox = tk.Listbox(pes3).place(x=220,y=130)
+
+
+
+
 #funciones OFFLINE
 def abrir():
    filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("all files","*."),("all files","*.*")))
@@ -58,33 +106,37 @@ def invertir_fecha(fecha):
     return fechaNueva
 
 def procesar():
-	aapl = yf.download(Codigo.get(), start=invertir_fecha(Fecha_Inicio.get()), end=invertir_fecha(Fecha_Final.get()))
-	print (aapl)
-	aapl.to_csv('cache/fb_ohlc.csv')
-	limpieza = (str(aapl).split("\n"))
-	DataFinal = []
-	for linea in limpieza[1:]:
-		datos = linea.split()
-	if len(datos) > 5:
-		DataFinal.append([datos[0],datos[4]])
-	if len(DataFinal) == 0:
-		messagebox.showwarning("Advertencia","Informacion invalida vuelva a intentar")
-		return
-	else:
-		messagebox.showinfo("Ok","Datos Listos y almacenados")
-	test = aapl['Close'][-60:-1]
-	test2 = aapl['Close'][-120:-60]
-	if Time_maduracion.get() > 3:
-		volatividad = sigma(functionS(test)+functionS(test2))
-		messagebox.showinfo("ok","La Volatividad es de:  "+ str(volatividad))
-		etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-		etiqueta_Volatividad.grid(row=15, column=3)
-	else:
-		print (test)
-		volatividad =sigma(functionS(test))
-		messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
-		etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-		etiqueta_Volatividad.grid(row=15, column=3)
+    aapl = yf.download(Codigo.get(), start=invertir_fecha(Fecha_Inicio.get()), end=invertir_fecha(Fecha_Final.get()))
+    aapl.to_csv('fb_ohlc.csv')
+    limpieza = (str(aapl).split("\n"))
+    DataFinal = []
+    for linea in limpieza[1:]:
+        datos = linea.split()
+        if len(datos) > 5:
+            DataFinal.append([datos[0],datos[4]])
+
+    if len(DataFinal) == 0:
+        messagebox.showwarning("Advertencia","Informacion invalida vuelva a intentar")
+        return
+    else:
+        messagebox.showinfo("Ok","Datos Listos y almacenados")
+    test = aapl['Close'][-60:-1]
+    test2 = aapl['Close'][-120:-60]
+    if Time_maduracion.get() > 3:
+        print (test,test2)
+        volatividad = sigma(functionS(test)+functionS(test2))
+        messagebox.showinfo("ok","La Volatividad es de:  "+ str(volatividad))
+        etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
+        Resultados_online(volatividad)
+        
+    else:
+        print (test)
+        volatividad =sigma(functionS(test))
+        messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
+        etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
+        Resultados_online(volatividad)
+        
+
 
 def procesar2():
 	import csv
@@ -107,14 +159,23 @@ def procesar2():
 		print (DataFinal)
 		volatividad =sigma(functionS(DataFinal))
 		messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
-		etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-		etiqueta_Volatividad.grid(row=15, column=3)
+		pestaña_offline(Volatividad)
+
     
 def guardar(data):
     archivo = open("cache/" + str(Codigo.get())+".txt", "w")
     archivo.write(str(data))
     archivo.close()
     return ("Guardado")
+
+
+
+
+
+
+
+
+
 
 
 #ventana
@@ -148,8 +209,6 @@ Codigo = StringVar()
 Fecha_Inicio = StringVar()
 Fecha_Final = StringVar()
 Tasa_interes = IntVar()
-Fecha_Inicio.set(str(time.strftime("20%y-%m-%d")))
-Fecha_Final.set(str(time.strftime("20%y-%m-%d")))
 Time_maduracion = IntVar()
 Precio_ejecucion = IntVar()
 Volatividad = IntVar()
@@ -173,7 +232,8 @@ entrada_Fecha_Inicio = DateEntry(pes1, width=12, background='darkblue',foregroun
 
 #Fecha Final
 etiqueta_Fecha_Final = Label(pes1, text='Fecha Final: ',fg=colorLetra,bg=colorFondo).place(x=420,y=180)
-entrada_Fecha_Final = DateEntry(pes1, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final).place(x=500,y=180)
+entrada_Fecha_Final = DateEntry(pes1, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final)
+entrada_Fecha_Final.place(x=500,y=180)
 
 
 
@@ -200,14 +260,14 @@ pes2 = ttk.Frame(notebook,style='My.TFrame')
 notebook.add(pes2,text="OFFLINE")
 #variables pestaña 2
 Archivo = StringVar()
-Fecha_Inicio = StringVar()
-Fecha_Final = StringVar()
-Tasa_interes = IntVar()
-Fecha_Inicio.set(str(time.strftime("20%y-%m-%d")))
-Fecha_Final.set(str(time.strftime("20%y-%m-%d")))
-Time_maduracion = IntVar()
-Precio_ejecucion = IntVar()
-Volatividad = IntVar()
+Fecha_Inicio2 = StringVar()
+Fecha_Final2 = StringVar()
+Tasa_interes2 = IntVar()
+Fecha_Inicio2.set(str(time.strftime("20%y-%m-%d")))
+Fecha_Final2.set(str(time.strftime("20%y-%m-%d")))
+Time_maduracion2 = IntVar()
+Precio_ejecucion2 = IntVar()
+Volatividad2 = IntVar()
 
 #generación de widgets
 #logo
@@ -222,35 +282,40 @@ entrada_Codigo = Button(pes2,text="Seleccionar archivo", command=abrir).place(x=
 
 #Fecha Inicio
 etiqueta_Fecha_Inicio = Label(pes2, text='Fecha Inicio: ',fg=colorLetra,bg=colorFondo).place(x=150,y=180)
-entrada_Fecha_Inicio = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Inicio).place(x=300,y=180)
+entrada_Fecha_Inicio = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Inicio2).place(x=300,y=180)
 
 
 
 
 #Fecha Final
 etiqueta_Fecha_Final = Label(pes2, text='Fecha Final: ',fg=colorLetra,bg=colorFondo).place(x=420,y=180)
-entrada_Fecha_Final = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final).place(x=500,y=180)
+entrada_Fecha_Final = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final2).place(x=500,y=180)
 
 
 
 #Tasa interes
 etiqueta_Tasa_interes = Label(pes2, text='Tasa interes: ',fg=colorLetra,bg=colorFondo).place(x=150,y=330)
-entrada_Tasa_interes = Entry(pes2, textvariable=Tasa_interes,width=15).place(x=300,y=330)
+entrada_Tasa_interes = Entry(pes2, textvariable=Tasa_interes2,width=15).place(x=300,y=330)
 
 
 #Tiempo de maduracion 
 etiqueta_Time_maduracion = Label(pes2, text='Tiempo de maduracion: ',fg=colorLetra,bg=colorFondo).place(x=150,y=230)
-entrada_Time_maduracion = Entry(pes2, textvariable=Time_maduracion,width=15).place(x=300,y=230)
+entrada_Time_maduracion = Entry(pes2, textvariable=Time_maduracion2,width=15).place(x=300,y=230)
 
 
 #Precio de ejecucion  
 etiqueta_Precio_ejecucion = Label(pes2, text='Precio de ejecucion : ',font=('Governor',10),fg=colorLetra,bg=colorFondo).place(x=150,y=280)
-entrada_Precio_ejecucion = Entry(pes2, textvariable=Precio_ejecucion,width=15).place(x=300,y=280)
+entrada_Precio_ejecucion = Entry(pes2, textvariable=Precio_ejecucion2,width=15).place(x=300,y=280)
 
 #boton
 boton = Button(pes2, text='Procesar', command=procesar2, width=15, bg=colorFondo).place(x=300,y=380)
 
 
+#variables pestaña 2
+#generación de widgets
+#logo
+# Banner2 = PhotoImage(file="img/bienvenidos2.png")
+# lblBanner2 = Label(pes3,image=Banner2,bg=colorFondo).place(x=0,y=0)
 
 
 
