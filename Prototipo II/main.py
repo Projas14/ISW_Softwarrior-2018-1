@@ -14,14 +14,56 @@ from tkcalendar import Calendar, DateEntry
 from tkinter import filedialog
 
 import quandl
+import math
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from math import *
 from decimal import *
+import random
 #|--------------------------------------------------|
 #|                  FUNCIONES                       |
 #|--------------------------------------------------|
+
+
+
+#Calculamos los n numeros aleatorios de 0 a raiz de t para hacer la simulacion   
+def aleatorios(t,n):
+    numeros = list()
+    for i in range(n):
+        numeros.append(random.uniform(0,float(t**0.5)))
+    return numeros
+
+#Precios aplicados con los numeros aleatorios
+def funcion_precio(v,r,Pi,t,numeros):
+    precios = list()
+    for z in numeros:
+        precios.append(Pi*math.exp(r-(0.5*v**2))*t + v*z)
+    return precios
+
+#Calculamos el maximo de los precios menos el precio de ejercicio
+def maximo(v,r,Pi,t,n,k):
+    al = aleatorios(t,n)
+    precios = funcion_precio(v,r,Pi,t,al)
+    resta = list()
+    for p in precios:
+        resta.append(p-k)
+    resta.append(0)
+    return max(resta)
+
+
+#Ingresas la volatilidad, la tasa de interes, la lista con todos los precios de los activos de la accion, la fecha de inicio(solo una constante), cantidad de iteraciones y el precio de ejercicio que te da el cliente
+def Monte_Carlo(volatilidad,intereses,Precios,t,iteraciones,Pejercicio):
+    multiplicador = 0
+    maximos = list()
+    for p in Precios:
+        maximos.append(maximo(volatilidad,intereses,p,t,iteraciones,Pejercicio))
+    print(maximos)
+    for m in maximos:
+       multiplicador += m
+    multiplicador = multiplicador/len(Precios)
+    return math.exp(-intereses*t)*multiplicador
+
 def prom(list):
    suma = 0
    for i in list:
@@ -57,23 +99,9 @@ def Resultados_online(volatividad):
 	notebook.add(pes4,text="Resultados_OnLine")
 	Banner4 = PhotoImage(file="img/bienvenidos2.png")
 	lblBanner4 = Label(pes4,image=Banner4,bg=colorFondo).place(x=0,y=0)
-
-	# for i in range(2): 
-	#     for j in range(2):
-	#     	if i == 0:
-	#     		if j == 0:
-	# 	    		l = Label(pes4,text="Nombre", relief=RIDGE) 
-	# 	    		l.place(x=200,y=200)
-	#     		if j == 1:
-	# 	    		l = Label(pes4,text="Valor", relief=RIDGE) 
-	# 	    		l.place(x=300,y=200)
-	#     	if i == 1:
-	#     		if j == 0:
-	# 	    		l = Label(pes4,text="Volatividad", relief=RIDGE) 
-	# 	    		l.place(x=200,y=300)
-	#     		if j==1:
-	# 	    		l = Label(pes4,text=str(volatividad), relief=RIDGE) 
-	# 	    		l.place(x=200,y=300)
+	etiqueta1 = Label(pes4, text='El Resultado final es de : ',font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=280)
+	etiqueta2 = Label(pes4, text=str(volatividad),font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=380)
+	
 
 
 
@@ -86,10 +114,10 @@ def pestaña_offline(volatividad):
 		pes3 = ttk.Frame(notebook,style='My.TFrame')
 		notebook.add(pes3,text="Resultados_offline")
 		#logo
-		Banner3 = PhotoImage(file="img/bienvenidos2.png")
+		Banner3 = PhotoImage(file="img/bienvenidos.png")
 		lblBanner3 = Label(pes3,image=Banner3,bg=colorFondo).place(x=0,y=0)
-		#Codigo
-		listbox = tk.Listbox(pes3).place(x=220,y=130)
+		etiqueta1_1 = Label(pes3, text='El Resultado final es de : ',font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=280)
+		etiqueta2_1 = Label(pes3, text=str(volatividad),font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=380)
 
 
 
@@ -106,6 +134,7 @@ def invertir_fecha(fecha):
     return fechaNueva
 
 def procesar():
+    print(Fecha_Inicio.get(),Fecha_Final.get())
     aapl = yf.download(Codigo.get(), start=invertir_fecha(Fecha_Inicio.get()), end=invertir_fecha(Fecha_Final.get()))
     aapl.to_csv('fb_ohlc.csv')
     limpieza = (str(aapl).split("\n"))
@@ -123,18 +152,20 @@ def procesar():
     test = aapl['Close'][-60:-1]
     test2 = aapl['Close'][-120:-60]
     if Time_maduracion.get() > 3:
-        print (test,test2)
         volatividad = sigma(functionS(test)+functionS(test2))
-        messagebox.showinfo("ok","La Volatividad es de:  "+ str(volatividad))
-        etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-        Resultados_online(volatividad)
+        messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
+        resultado = Monte_Carlo(volatividad,Tasa_interes.get(),test,1,100,Precio_ejecucion.get())
+        messagebox.showinfo("ok","El resultado es  de: "+ str(resultado))
+        Resultados_online(resultado)
         
     else:
-        print (test)
         volatividad =sigma(functionS(test))
         messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
-        etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-        Resultados_online(volatividad)
+        resultado = Monte_Carlo(volatividad,Tasa_interes.get(),test,1,100,Precio_ejecucion.get())
+        messagebox.showinfo("ok","El resultado es  de: "+ str(resultado))
+        Resultados_online(resultado)
+        
+        
         
 
 
@@ -146,20 +177,22 @@ def procesar2():
 		DataFinal = []
 		for row in reader:
 			if contador != 0:
-				print(row[4])
-
 				DataFinal.append(float(row[4]))
 			contador = contador + 1
 	if Time_maduracion.get() > 3:
-		volatividad = sigma(functionS(DataFinal))
-		messagebox.showinfo("ok","La Volatividad es de:  "+ str(volatividad))
-		etiqueta_Volatividad = Label(ventana, text='La Volatividad es de:  '+str(volatividad))
-		etiqueta_Volatividad.grid(row=15, column=3)
+		volatividad2 = sigma(functionS(DataFinal))
+		messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad2))
+		resultado = Monte_Carlo(volatividad2,Tasa_interes.get(),DataFinal,1,100,Precio_ejecucion.get())
+		messagebox.showinfo("ok","El resultado es  de: "+ str(resultado))
+		pestaña_offline(resultado)
+		
+
 	else:
-		print (DataFinal)
-		volatividad =sigma(functionS(DataFinal))
-		messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad))
-		pestaña_offline(Volatividad)
+		volatividad2 = sigma(functionS(DataFinal))
+		messagebox.showinfo("ok","la Volatividad es de: "+ str(volatividad2))
+		resultado = Monte_Carlo(volatividad2,Tasa_interes.get(),DataFinal,1,100,Precio_ejecucion.get())
+		messagebox.showinfo("ok","El resultado es  de: "+ str(resultado))
+		pestaña_offline(resultado)
 
     
 def guardar(data):
@@ -190,7 +223,7 @@ s2.configure('My.TFrame2',background="#000",foreground=colorLetra)
 ventana.title('Valoración de Opciones sobre Acciones')
 notebook = ttk.Notebook(ventana)
 notebook.pack(fill='both', expand='yes')
-ventana.geometry("754x480+0+0")
+ventana.geometry("754x480+100+100")
 
 #pestaña 0
 pes0 = ttk.Frame(notebook)
@@ -267,7 +300,7 @@ Fecha_Inicio2.set(str(time.strftime("20%y-%m-%d")))
 Fecha_Final2.set(str(time.strftime("20%y-%m-%d")))
 Time_maduracion2 = IntVar()
 Precio_ejecucion2 = IntVar()
-Volatividad2 = IntVar()
+
 
 #generación de widgets
 #logo
@@ -286,10 +319,11 @@ entrada_Fecha_Inicio = DateEntry(pes2, width=12, background='darkblue',foregroun
 
 
 
-
 #Fecha Final
 etiqueta_Fecha_Final = Label(pes2, text='Fecha Final: ',fg=colorLetra,bg=colorFondo).place(x=420,y=180)
-entrada_Fecha_Final = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final2).place(x=500,y=180)
+entrada_Fecha_Final = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final2)
+entrada_Fecha_Final.place(x=500,y=180)
+
 
 
 
