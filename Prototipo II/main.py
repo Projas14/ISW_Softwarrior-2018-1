@@ -64,6 +64,9 @@ def Monte_Carlo(volatilidad,intereses,Precios,t,iteraciones,Pejercicio):
     multiplicador = multiplicador/len(Precios)
     return math.exp(-intereses*t)*multiplicador
 
+#|--------------------------------------------------|
+#|          FUNCIONES PARA LA VOLATIVIDAD           |
+#|--------------------------------------------------|
 def prom(list):
    suma = 0
    for i in list:
@@ -93,7 +96,10 @@ def functionS(data):
 
    return((1/(len(list)-1))*sumatoria)
 
-#Funciones nuevas pestañas 
+
+#|--------------------------------------------------|
+#|         FUNCION   PESTAÑA RESULTADOS             |
+#|--------------------------------------------------|
 def Resultados_online(volatividad):
 	pes4 = ttk.Frame(notebook,style='My.TFrame')
 	notebook.add(pes4,text="Resultados_OnLine")
@@ -103,13 +109,9 @@ def Resultados_online(volatividad):
 	etiqueta2 = Label(pes4, text=str(volatividad),font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=380)
 	
 
-
-
-
-
-
-
-
+#|--------------------------------------------------|
+#|            PESTAÑA RESULTADOS OFFLINE            |
+#|--------------------------------------------------|
 def pestaña_offline(volatividad):
 		pes3 = ttk.Frame(notebook,style='My.TFrame')
 		notebook.add(pes3,text="Resultados_offline")
@@ -120,19 +122,22 @@ def pestaña_offline(volatividad):
 		etiqueta2_1 = Label(pes3, text=str(volatividad),font=('Governor',20),fg=colorLetra,bg=colorFondo).place(x=150,y=380)
 
 
-
-
-#funciones OFFLINE
+#|--------------------------------------------------|
+#|            FUNCIONES                             |
+#|--------------------------------------------------|
+#BUSCADOR DE ARCHIVO
 def abrir():
    filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("all files","*."),("all files","*.*")))
    Archivo.set(str(filename))
    print(Archivo.get())
+
 #funciones de procesamiento
 def invertir_fecha(fecha):
     fecha = fecha.split("-")
     fechaNueva = str(fecha[2])+"-"+str(fecha[1])+"-"+str(fecha[0])
     return fechaNueva
 
+#PROCESAMIENTO RESULTADOS ONLINE
 def procesar():
     print(Fecha_Inicio.get(),Fecha_Final.get())
     aapl = yf.download(Codigo.get(), start=invertir_fecha(Fecha_Inicio.get()), end=invertir_fecha(Fecha_Final.get()))
@@ -166,9 +171,7 @@ def procesar():
         Resultados_online(resultado)
         
         
-        
-
-
+# PROCESAMIENTO DE RESULTADOS OFFLINE
 def procesar2():
 	import csv
 	with open(Archivo.get(), newline='') as File:  
@@ -194,24 +197,17 @@ def procesar2():
 		messagebox.showinfo("ok","El resultado es  de: "+ str(resultado))
 		pestaña_offline(resultado)
 
-    
+#ALMACENAMIENTO DE DATOS
 def guardar(data):
     archivo = open("cache/" + str(Codigo.get())+".txt", "w")
     archivo.write(str(data))
     archivo.close()
     return ("Guardado")
 
+#|--------------------------------------------------|
+#|            FUNCIONES DE LA VENTANA               |
+#|--------------------------------------------------|
 
-
-
-
-
-
-
-
-
-
-#ventana
 ventana = Tk()
 colorFondo = "#00a1f2"
 colorLetra = "#000"
@@ -225,7 +221,10 @@ notebook = ttk.Notebook(ventana)
 notebook.pack(fill='both', expand='yes')
 ventana.geometry("754x480+100+100")
 
-#pestaña 0
+#|--------------------------------------------------|
+#|            PESTAÑA 0                             |
+#|--------------------------------------------------|
+
 pes0 = ttk.Frame(notebook)
 notebook.add(pes0,text="INICIO")
 #bienvenidos
@@ -234,7 +233,11 @@ etiqueta1= Label(pes0, image=BV,fg="#000",bg="#000").place(x=0,y=0)
 etiqueta2 = Label(pes0, text="Beatriz Segura - Paul Rojas - Gabriela Sepulvedad",fg=colorLetra,bg="#00a1f2").place(x=260,y=400)
 
 
-#pestaña 1
+
+#|--------------------------------------------------|
+#|            PESTAÑA 1                             |
+#|--------------------------------------------------|
+
 pes1 = ttk.Frame(notebook,style='My.TFrame')
 notebook.add(pes1,text="ONLINE")
 #variables pestaña 1
@@ -247,28 +250,22 @@ Precio_ejecucion = IntVar()
 Volatividad = IntVar()
 
 #generación de widgets
-#logo
+
 Banner1 = PhotoImage(file="img/bienvenidos2.png")
 lblBanner1 = Label(pes1,image=Banner1,bg=colorFondo).place(x=0,y=0)
+
 #Codigo
 etiqueta_Codigo = Label(pes1, text='Codigo:',fg=colorLetra,bg=colorFondo).place(x=150,y=130)
 entrada_Codigo = Entry(pes1, textvariable=Codigo,width=15).place(x=300,y=130)
-
-
 
 #Fecha Inicio
 etiqueta_Fecha_Inicio = Label(pes1, text='Fecha Inicio: ',fg=colorLetra,bg=colorFondo).place(x=150,y=180)
 entrada_Fecha_Inicio = DateEntry(pes1, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Inicio).place(x=300,y=180)
 
-
-
-
 #Fecha Final
 etiqueta_Fecha_Final = Label(pes1, text='Fecha Final: ',fg=colorLetra,bg=colorFondo).place(x=420,y=180)
 entrada_Fecha_Final = DateEntry(pes1, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final)
 entrada_Fecha_Final.place(x=500,y=180)
-
-
 
 #Tasa interes
 etiqueta_Tasa_interes = Label(pes1, text='Tasa interes: ',fg=colorLetra,bg=colorFondo).place(x=150,y=330)
@@ -279,16 +276,18 @@ entrada_Tasa_interes = Entry(pes1, textvariable=Tasa_interes,width=15).place(x=3
 etiqueta_Time_maduracion = Label(pes1, text='Tiempo de maduracion: ',fg=colorLetra,bg=colorFondo).place(x=150,y=230)
 entrada_Time_maduracion = Entry(pes1, textvariable=Time_maduracion,width=15).place(x=300,y=230)
 
-
 #Precio de ejecucion  
 etiqueta_Precio_ejecucion = Label(pes1, text='Precio de ejecucion : ',font=('Governor',10),fg=colorLetra,bg=colorFondo).place(x=150,y=280)
 entrada_Precio_ejecucion = Entry(pes1, textvariable=Precio_ejecucion,width=15).place(x=300,y=280)
 
-#boton
+#BOTON PARA PROCESAR
 boton = Button(pes1, text='Procesar', command=procesar, width=15, bg=colorFondo).place(x=300,y=380)
 
 
-#pestaña 2
+#|--------------------------------------------------|
+#|            PESTAÑA 2                             |
+#|--------------------------------------------------|
+
 pes2 = ttk.Frame(notebook,style='My.TFrame')
 notebook.add(pes2,text="OFFLINE")
 #variables pestaña 2
@@ -301,7 +300,6 @@ Fecha_Final2.set(str(time.strftime("20%y-%m-%d")))
 Time_maduracion2 = IntVar()
 Precio_ejecucion2 = IntVar()
 
-
 #generación de widgets
 #logo
 Banner2 = PhotoImage(file="img/bienvenidos2.png")
@@ -312,19 +310,15 @@ Etiqueta_Archivo = Entry(pes2, textvariable=Archivo,width=15).place(x=220,y=130)
 entrada_Codigo = Button(pes2,text="Seleccionar archivo", command=abrir).place(x=320,y=130)
 
 
-
 #Fecha Inicio
 etiqueta_Fecha_Inicio = Label(pes2, text='Fecha Inicio: ',fg=colorLetra,bg=colorFondo).place(x=150,y=180)
 entrada_Fecha_Inicio = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Inicio2).place(x=300,y=180)
-
 
 
 #Fecha Final
 etiqueta_Fecha_Final = Label(pes2, text='Fecha Final: ',fg=colorLetra,bg=colorFondo).place(x=420,y=180)
 entrada_Fecha_Final = DateEntry(pes2, width=12, background='darkblue',foreground='white', borderwidth=2, textvariable=Fecha_Final2)
 entrada_Fecha_Final.place(x=500,y=180)
-
-
 
 
 #Tasa interes
@@ -345,21 +339,5 @@ entrada_Precio_ejecucion = Entry(pes2, textvariable=Precio_ejecucion2,width=15).
 boton = Button(pes2, text='Procesar', command=procesar2, width=15, bg=colorFondo).place(x=300,y=380)
 
 
-#variables pestaña 2
-#generación de widgets
-#logo
-# Banner2 = PhotoImage(file="img/bienvenidos2.png")
-# lblBanner2 = Label(pes3,image=Banner2,bg=colorFondo).place(x=0,y=0)
-
-
-
-
-
-
-
 
 ventana.mainloop()
-
-
-
-
